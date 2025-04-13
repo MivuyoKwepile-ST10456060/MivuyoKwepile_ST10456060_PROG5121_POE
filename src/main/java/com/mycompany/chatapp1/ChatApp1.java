@@ -92,7 +92,7 @@ public class ChatApp1 {
         if (cellNumber != null && Pattern.matches(regex, cellNumber)) {
             return "Phone number successfully captured.";
         } else {
-            return "Invalid South African phone number. Please enter in format +27XXXXXXXXX or 0XXXXXXXXX (9 digits after +27 or 9 digits after 0).";
+            return "Cell number is incorrectly formatted or does not contain a international code. Please enter in format +27XXXXXXXXX or 0XXXXXXXXX (9 digits after +27 or 9 digits after 0).";
         }
     }
 
