@@ -18,6 +18,12 @@ public class ChatApp1 {
         
         System.out.println("=== Register ===");
         
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Enter your surname: ");
+        String surname = scanner.nextLine();
+        
         // Prompt for username until valid
         while (true) {
             System.out.print("Enter username: ");
@@ -58,7 +64,7 @@ public class ChatApp1 {
         }
         
         // Create Login object with registered details
-        Login userLogin = new Login(username, password, cellNumber);
+        Login userLogin = new Login(username, password, cellNumber,name, surname);
         System.out.println("\nRegistration completed successfully!");
 
         boolean loggedIn = performLogin(scanner, userLogin);
