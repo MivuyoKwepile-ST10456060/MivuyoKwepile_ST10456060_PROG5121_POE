@@ -93,7 +93,7 @@ public final class Message {
         return messageCount;
     }
 
-    public boolean storeMessage() {
+    public boolean storeMessage() {  //Open AI
         JSONObject json = new JSONObject();
         json.put("MessageID", messageID);
         json.put("Recipient", recipient);
@@ -110,7 +110,7 @@ public final class Message {
     }
 
     @Override
-    public String toString() {
+    public String toString() {  //OpenAI
         return "MessageID: " + messageID +
                 "\nRecipient: " + recipient +
                 "\nMessage: " + message +
