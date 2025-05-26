@@ -1,8 +1,10 @@
-/*
+   /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.chatapp1;
+
+
 
 import java.util.Scanner;
 
@@ -11,11 +13,15 @@ public class Login {
     private final String username;
     private final String password;
     private final String cellNumber;
+    private final String name;
+    private final String surname;
     
-    public Login(String username, String password, String cellNumber){
+    public Login(String username, String password, String cellNumber, String name, String surname){
             this.username = username;
             this.password = password;
             this.cellNumber = cellNumber;
+            this.name = name;
+            this.surname = surname;
     
     }
     
@@ -27,6 +33,12 @@ public class Login {
     }
     public String getCellNumber(){
         return cellNumber;
+    }
+     public String getName(){
+        return name;
+    }
+     public String getSurname(){
+        return surname;
     }
    
     public boolean checkUsername(String username) {
@@ -72,9 +84,9 @@ public class Login {
     }
 }
 
-    public static void performLogin(Scanner scanner, Login userLogin) {
+   public static boolean performLogin(Scanner scanner, Login userLogin) {
     System.out.println("\n=== Login ===");
-    
+
     while (true) {
         System.out.print("Enter username: ");
         String inputUsername = scanner.nextLine();
@@ -82,16 +94,19 @@ public class Login {
         System.out.print("Enter password: ");
         String inputPassword = scanner.nextLine();
 
-        if (userLogin.getUsername().equals(inputUsername) && userLogin.getPassword().equals(inputPassword)) {
-            System.out.println("Login successful! Welcome, " + inputUsername + ".");
-            break;
+        if (userLogin.getUsername().equals(inputUsername) &&
+            userLogin.getPassword().equals(inputPassword)) {
+            String name;
+            String surname;
+            System.out.println("Welcome, " + userLogin.getName() + " " + userLogin.getSurname() + "!");
+
+            return true;
         } else {
             System.out.println("Login failed. Please try again.");
         }
     }
 }
 
-    
 }
     
 
