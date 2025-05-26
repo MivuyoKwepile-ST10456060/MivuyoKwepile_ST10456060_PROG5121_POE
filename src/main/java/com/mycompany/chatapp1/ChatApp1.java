@@ -3,6 +3,7 @@ package com.mycompany.chatapp1;
 import static com.mycompany.chatapp1.Login.performLogin;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import javax.swing.JOptionPane;
 
 public class ChatApp1 {
 
@@ -60,8 +61,15 @@ public class ChatApp1 {
         Login userLogin = new Login(username, password, cellNumber);
         System.out.println("\nRegistration completed successfully!");
 
-        // Call the Login class's functionality
-        performLogin (scanner, userLogin);  //Open AI
+        boolean loggedIn = performLogin(scanner, userLogin);
+
+        if (loggedIn) {
+            System.out.println("\nLogin successful! Launching QuickChat Messaging...");
+            JOptionPane.showMessageDialog(null, "QuickChat launched successfully.");
+            Message.main(new String[]{});  // This should run the Message GUI
+        } else {
+          System.out.println("Login failed. Exiting...");
+        }
 
         scanner.close();
     }
