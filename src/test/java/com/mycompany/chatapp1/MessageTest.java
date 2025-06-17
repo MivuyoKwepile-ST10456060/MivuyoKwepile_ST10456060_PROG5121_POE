@@ -1,115 +1,124 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit4TestClass.java to edit this template
- */
 package com.mycompany.chatapp1;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
-/**
- *
- * @author RC_Student_lab
- */
 public class MessageTest {
-    
-    public MessageTest() {
-    }
-    
-    @BeforeClass
-    public static void setUpClass() {
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
 
-    @Test
-    public void testCheckMessageID() {
-        System.out.println("checkMessageID");
-        Message instance = null;
-        boolean expResult = false;
-        boolean result = instance.checkMessageID();
-        assertEquals(expResult, result);
-        fail("The test case is a prototype.");
+    private Message message;
+
+    @Before
+    public void setUp() {
+        message = new Message("0123456789", "0761234567", "This is a test message");
     }
 
     @Test
     public void testCheckRecipientCell() {
-        System.out.println("checkRecipientCell");
-        Message instance = null;
-        boolean expResult = false;
-        boolean result = instance.checkRecipientCell();
-        assertEquals(expResult, result);
-        fail("The test case is a prototype.");
+        assertTrue(message.checkRecipientCell());
+
+        Message invalid = new Message("0123456789", "12345", "Invalid recipient");
+        assertFalse(invalid.checkRecipientCell());
     }
 
     @Test
     public void testCreateMessageHash() {
-        System.out.println("createMessageHash");
-        Message instance = null;
-        String expResult = "";
-        String result = instance.createMessageHash();
-        assertEquals(expResult, result);
-        fail("The test case is a prototype.");
+        String hash = message.createMessageHash();
+        assertNotNull(hash);
+        assertTrue(hash.matches("^[0-9]{2}:[0-9]+:.+ .+$"));
     }
 
     @Test
     public void testSentMessage() {
-        System.out.println("sentMessage");
-        Message instance = null;
-        String expResult = "";
-        String result = instance.sentMessage();
-        assertEquals(expResult, result);
-        fail("The test case is a prototype.");
+        int beforeCount = Message.returnTotalMessages();
+        String result = message.sentMessage();  // Will show a dialog; ideally mock this
+        int afterCount = Message.returnTotalMessages();
+
+        assertNotNull(result);
+        assertTrue(result.contains("Message"));
+        assertEquals(beforeCount + 1, afterCount);
     }
 
     @Test
     public void testPrintMessages() {
-        System.out.println("printMessages");
-        String expResult = "";
-        String result = Message.printMessages();
-        assertEquals(expResult, result);
-        fail("The test case is a prototype.");
+        message.sentMessage();
+        String printed = Message.printMessages();
+        assertNotNull(printed);
+        assertTrue(printed.contains("MessageID"));
     }
 
     @Test
     public void testReturnTotalMessages() {
-        System.out.println("returnTotalMessages");
-        int expResult = 0;
-        int result = Message.returnTotalMessages();
-        assertEquals(expResult, result);
-        fail("The test case is a prototype.");
+        int initial = Message.returnTotalMessages();
+        new Message("0123456789", "0761234567", "Another message").sentMessage();
+        assertEquals(initial + 1, Message.returnTotalMessages());
     }
 
     @Test
-    public void testStoreMessage() {
-        System.out.println("storeMessage");
-        Message instance = null;
-        boolean expResult = false;
-        boolean result = instance.storeMessage();
-        assertEquals(expResult, result);
-        fail("The test case is a prototype.");
+    public void testStoreMessage() throws Exception {
+        Message m = new Message("0123456789", "0761234567", "Test storing message");
+        boolean stored = m.storeMessage();
+        assertTrue(stored);
+
+        File file = new File("messages.json");
+        assertTrue(file.exists());
+
+        List<String> lines = Files.readAllLines(file.toPath());
+        assertTrue(lines.stream().anyMatch(line -> line.contains("Test storing message")));
+
+        // Clean up
+        file.delete();
     }
 
     @Test
     public void testToString() {
-        System.out.println("toString");
-        Message instance = null;
-        String expResult = "";
-        String result = instance.toString();
-        assertEquals(expResult, result);
-        fail("The test case is a prototype.");
+        String s = message.toString();
+        assertTrue(s.contains("MessageID"));
+        assertTrue(s.contains("Sender"));
+        assertTrue(s.contains("Recipient"));
+        assertTrue(s.contains("Message"));
+        assertTrue(s.contains("MessageHash"));
     }
 
     @Test
-    public void testMain() {
-        System.out.println("main");
-        String[] args = null;
-        Message.main(args);
-        fail("The test case is a prototype.");
+    public void testSearchByMessageID() {
+        Message m = new Message("0112233445", "0765556666", "Testing ID search");
+        m.sentMessage();
+        String found = Message.searchByMessageID(m.messageID);
+        assertTrue(found.contains("Testing ID search"));
+
+        String notFound = Message.searchByMessageID("nonexistentid");
+        assertEquals("Message ID not found.", notFound);
     }
-    
+
+    @Test
+    public void testSearchByRecipient() {
+        Message m1 = new Message("0112233445", "0768889999", "Hi there!");
+        Message m2 = new Message("0112233445", "0768889999", "Second message");
+        m1.sentMessage();
+        m2.sentMessage();
+
+        String result = Message.searchByRecipient("0768889999");
+        assertTrue(result.contains("Hi there!"));
+        assertTrue(result.contains("Second message"));
+
+        String noResult = Message.searchByRecipient("0000000000");
+        assertEquals("No messages found for recipient: 0000000000", noResult);
+    }
+
+    @Test
+    public void testLongestMessage() {
+        Message shortMsg = new Message("0123", "0761112222", "Hi");
+        Message longMsg = new Message("0123", "0761112222", "This is a much longer message for testing.");
+        shortMsg.sentMessage();
+        longMsg.sentMessage();
+
+        String longest = Message.longestMessage();
+        assertTrue(longest.contains("longer message"));
+    }
 }
