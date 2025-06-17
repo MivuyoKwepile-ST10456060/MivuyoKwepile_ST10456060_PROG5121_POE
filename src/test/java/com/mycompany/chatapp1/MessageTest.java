@@ -36,7 +36,7 @@ public class MessageTest {
     @Test
     public void testSentMessage() {
         int beforeCount = Message.returnTotalMessages();
-        String result = message.sentMessage();  // Will show a dialog; ideally mock this
+        String result = message.sentMessage(); 
         int afterCount = Message.returnTotalMessages();
 
         assertNotNull(result);
