@@ -1,46 +1,32 @@
-   /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.chatapp1;
-
-
 
 import java.util.Scanner;
 
+
 public class Login {
-    
+
+    private static Object CurrentUser;
+
     private final String username;
     private final String password;
     private final String cellNumber;
     private final String name;
     private final String surname;
-    
-    public Login(String username, String password, String cellNumber, String name, String surname){
-            this.username = username;
-            this.password = password;
-            this.cellNumber = cellNumber;
-            this.name = name;
-            this.surname = surname;
-    
+
+    public Login(String username, String password, String cellNumber, String name, String surname) {
+        this.username = username;
+        this.password = password;
+        this.cellNumber = cellNumber;
+        this.name = name;
+        this.surname = surname;
     }
-    
-    public String getUsername(){
-        return username;
-    }
-    public String getPassword(){
-        return password;
-    }
-    public String getCellNumber(){
-        return cellNumber;
-    }
-     public String getName(){
-        return name;
-    }
-     public String getSurname(){
-        return surname;
-    }
-   
+
+    public String getUsername() { return username; }
+    public String getPassword() { return password; }
+    public String getCellNumber() { return cellNumber; }
+    public String getName() { return name; }
+    public String getSurname() { return surname; }
+
     public boolean checkUsername(String username) {
         return username.contains("_") && username.length() <= 5;
     }
@@ -53,20 +39,21 @@ public class Login {
     }
 
     public boolean checkCellPhoneNumber(String cellNumber) {
-    // SA numbers: either start with 0 and followed by 9 digits, or +27 followed by 9 digits
-    return cellNumber != null && (
-        cellNumber.matches("^0[6-8][0-9]{8}$") ||     // e.g., 0821234567
-        cellNumber.matches("^\\+27[6-8][0-9]{8}$")    // e.g., +27821234567
-    );
-}
-    
-    
+        return cellNumber != null && (
+            cellNumber.matches("^0[6-8][0-9]{8}$") ||
+            cellNumber.matches("^\\+27[6-8][0-9]{8}$")
+        );
+    }
+
     public String registerUser(String username, String password, String cellNumber) {
         if (!checkUsername(username)) {
-            return "Username is not correctly formatted, please ensure that your username contains an underscore and is no more than five characters in length.";
+            return "Username is not correctly formatted.";
         }
         if (!checkPasswordComplexity(password)) {
-            return "Password is not correctly formatted; please ensure that the password contains at least eight characters, a capital letter, a number, and a special character.";
+            return "Password is not correctly formatted.";
+        }
+        if (!checkCellPhoneNumber(cellNumber)) {
+            return "Cell number is incorrectly formatted.";
         }
         return "User registered successfully!";
     }
@@ -75,38 +62,33 @@ public class Login {
         return inputUsername.equals(registeredUser.getUsername()) &&
                inputPassword.equals(registeredUser.getPassword());
     }
-    
+
     public String returnLoginStatus(boolean loginSuccessful) {
-    if (loginSuccessful) {
-        return "Login successful! Welcome.";
-    } else {
-        return "Login failed! Incorrect username or password.";
+        return loginSuccessful ? "Login successful! Welcome." : "Login failed! Incorrect username or password.";
     }
-}
 
-   public static boolean performLogin(Scanner scanner, Login userLogin) {
-    System.out.println("\n=== Login ===");
+    public static boolean performLogin(Scanner scanner, Login userLogin) {
+        System.out.println("\n=== Login ===");
+        int attempts = 0;
+        final int MAX_ATTEMPTS = 3;
 
-    while (true) {
-        System.out.print("Enter username: ");
-        String inputUsername = scanner.nextLine();
+        while (attempts < MAX_ATTEMPTS) {
+            System.out.print("Enter username: ");
+            String inputUsername = scanner.nextLine().trim();
+            System.out.print("Enter password: ");
+            String inputPassword = scanner.nextLine().trim();
 
-        System.out.print("Enter password: ");
-        String inputPassword = scanner.nextLine();
-
-        if (userLogin.getUsername().equals(inputUsername) &&
-            userLogin.getPassword().equals(inputPassword)) {
-            String name;
-            String surname;
-            System.out.println("Welcome, " + userLogin.getName() + " " + userLogin.getSurname() + "!");
-
-            return true;
-        } else {
-            System.out.println("Login failed. Please try again.");
+            if (userLogin.getUsername().equals(inputUsername) &&
+                userLogin.getPassword().equals(inputPassword)) {
+                
+                System.out.println("Welcome, " + userLogin.getName() + " " + userLogin.getSurname() + "!");
+                return true;
+            } else {
+                attempts++;
+                System.out.println("Login failed. " + (MAX_ATTEMPTS - attempts) + " attempts remaining.");
+            }
         }
+
+        return false;
     }
 }
-
-}
-    
-
