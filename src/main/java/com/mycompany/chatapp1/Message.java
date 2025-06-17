@@ -16,7 +16,7 @@ public final class Message {
     private static final List<String> messageHashes = new ArrayList<>();
     private static final List<String> messageIDs = new ArrayList<>();
 
-    private final String messageID;
+    final String messageID;
     private final int numMessagesSent;
     private final String sender;
     private final String recipient;
@@ -149,7 +149,7 @@ public final class Message {
         return result.toString();
     }
 
-    // New Feature 3: Find Longest Message Sent
+    
     public static String longestMessage() {
         return sentMessageObjects.stream()
                 .max(Comparator.comparingInt(m -> m.message.length()))
