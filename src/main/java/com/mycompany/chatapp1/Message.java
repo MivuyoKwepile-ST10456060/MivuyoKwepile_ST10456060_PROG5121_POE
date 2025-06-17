@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.chatapp1;
 
 import javax.swing.*;
@@ -10,28 +6,33 @@ import java.io.IOException;
 import java.util.*;
 import org.json.simple.JSONObject;
 
-
-
 public final class Message {
     private static int messageCount = 0;
+
     private static final List<String> sentMessages = new ArrayList<>();
+    private static final List<Message> sentMessageObjects = new ArrayList<>();
+    private static final List<String> disregardedMessages = new ArrayList<>();
+    private static final List<String> storedMessages = new ArrayList<>();
+    private static final List<String> messageHashes = new ArrayList<>();
+    private static final List<String> messageIDs = new ArrayList<>();
 
     private final String messageID;
     private final int numMessagesSent;
+    private final String sender;
     private final String recipient;
     private final String message;
     private final String messageHash;
 
-    public Message(String recipient, String message) {
+    public Message(String sender, String recipient, String message) {
         this.messageID = generateMessageID();
         this.numMessagesSent = ++messageCount;
+        this.sender = sender;
         this.recipient = recipient;
         this.message = message;
         this.messageHash = createMessageHash();
+        messageIDs.add(messageID);
+        messageHashes.add(messageHash);
     }
-
-
-    
 
     private String generateMessageID() {
         Random rand = new Random();
@@ -42,15 +43,11 @@ public final class Message {
         return id.toString();
     }
 
-    public boolean checkMessageID() {
-        return messageID.length() == 10;
-    }
-
     public boolean checkRecipientCell() {
-         return recipient != null && (
-        recipient.matches("^0[6-8][0-9]{8}$") || 
-        recipient.matches("^\\+27[6-8][0-9]{8}$")
-    );
+        return recipient != null && (
+                recipient.matches("^0[6-8][0-9]{8}$") ||
+                        recipient.matches("^\\+27[6-8][0-9]{8}$")
+        );
     }
 
     public String createMessageHash() {
@@ -70,14 +67,21 @@ public final class Message {
         switch (choice) {
             case 0 -> {
                 sentMessages.add(this.toString());
+                sentMessageObjects.add(this);
                 return "Message sent";
             }
             case 1 -> {
+                disregardedMessages.add(this.toString());
                 return "Message disregarded";
             }
             case 2 -> {
-                storeMessage();
-                return "Message stored";
+                boolean stored = storeMessage();
+                if (stored) {
+                    storedMessages.add(this.toString());
+                    return "Message stored";
+                } else {
+                    return "Failed to store message";
+                }
             }
             default -> {
                 return "No action taken";
@@ -86,16 +90,17 @@ public final class Message {
     }
 
     public static String printMessages() {
-        return String.join("\n", sentMessages);
+        return sentMessages.isEmpty() ? "No messages sent yet." : String.join("\n\n", sentMessages);
     }
 
     public static int returnTotalMessages() {
         return messageCount;
     }
 
-    public boolean storeMessage() {  //Open AI
+    public boolean storeMessage() {
         JSONObject json = new JSONObject();
         json.put("MessageID", messageID);
+        json.put("Sender", sender);
         json.put("Recipient", recipient);
         json.put("Message", message);
         json.put("MessageHash", messageHash);
@@ -110,11 +115,46 @@ public final class Message {
     }
 
     @Override
-    public String toString() {  //OpenAI
+    public String toString() {
         return "MessageID: " + messageID +
+                "\nSender: " + sender +
                 "\nRecipient: " + recipient +
                 "\nMessage: " + message +
                 "\nMessageHash: " + messageHash;
+    }
+
+    // New Feature 1: Search by Message ID
+    public static String searchByMessageID(String id) {
+        return sentMessageObjects.stream()
+                .filter(m -> m.messageID.equals(id))
+                .map(Message::toString)
+                .findFirst()
+                .orElse("Message ID not found.");
+    }
+
+    // New Feature 2: Search by Recipient
+    public static String searchByRecipient(String recipient) {
+        List<Message> found = new ArrayList<>();
+        for (Message m : sentMessageObjects) {
+            if (m.recipient.equals(recipient)) {
+                found.add(m);
+            }
+        }
+        if (found.isEmpty()) return "No messages found for recipient: " + recipient;
+
+        StringBuilder result = new StringBuilder();
+        for (Message m : found) {
+            result.append(m.toString()).append("\n\n");
+        }
+        return result.toString();
+    }
+
+    // New Feature 3: Find Longest Message Sent
+    public static String longestMessage() {
+        return sentMessageObjects.stream()
+                .max(Comparator.comparingInt(m -> m.message.length()))
+                .map(Message::toString)
+                .orElse("No messages have been sent yet.");
     }
 
     public static void main(String[] args) {
@@ -124,29 +164,56 @@ public final class Message {
 
         OUTER:
         while (true) {
-            String[] options = {"Send Messages", "Show Recently Sent Messages", "Quit"};
+            String[] options = {
+                    "Send Messages",
+                    "Show Recently Sent Messages",
+                    "Search Message by ID",
+                    "Search Messages by Recipient",
+                    "Show Longest Sent Message",
+                    "Quit"
+            };
+
             int choice = JOptionPane.showOptionDialog(null, "Choose an option:", "Main Menu",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
             switch (choice) {
                 case 0 -> {
                     if (messageCount >= limit) {
                         JOptionPane.showMessageDialog(null, "Message limit reached.");
                         continue;
-                    }   String recipient = JOptionPane.showInputDialog("Enter recipient number:");
+                    }
+                    String sender = JOptionPane.showInputDialog("Enter your name or number:");
+                    String recipient = JOptionPane.showInputDialog("Enter recipient number:");
                     String message = JOptionPane.showInputDialog("Enter your message:");
                     if (message.length() > 250 || message.length() < 2) {
                         JOptionPane.showMessageDialog(null, "Please enter a message of between 2 and 250 characters.");
                         continue;
-                    }   Message msg = new Message(recipient, message);
+                    }
+                    Message msg = new Message(sender, recipient, message);
                     String result = msg.sentMessage();
                     JOptionPane.showMessageDialog(null, result);
                     JOptionPane.showMessageDialog(null, msg.toString());
                 }
-                case 1 -> JOptionPane.showMessageDialog(null, "Coming Soon.");
+
+                case 1 -> JOptionPane.showMessageDialog(null, printMessages());
+
                 case 2 -> {
+                    String id = JOptionPane.showInputDialog("Enter the Message ID to search:");
+                    JOptionPane.showMessageDialog(null, searchByMessageID(id));
+                }
+
+                case 3 -> {
+                    String recipient = JOptionPane.showInputDialog("Enter recipient number to search:");
+                    JOptionPane.showMessageDialog(null, searchByRecipient(recipient));
+                }
+
+                case 4 -> JOptionPane.showMessageDialog(null, longestMessage());
+
+                case 5 -> {
                     JOptionPane.showMessageDialog(null, "Goodbye!");
                     break OUTER;
                 }
+
                 default -> {
                 }
             }
@@ -154,6 +221,4 @@ public final class Message {
 
         JOptionPane.showMessageDialog(null, "Total messages sent: " + returnTotalMessages());
     }
-
-    
 }
