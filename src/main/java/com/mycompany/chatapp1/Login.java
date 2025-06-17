@@ -5,8 +5,6 @@ import java.util.Scanner;
 
 public class Login {
 
-    private static Object CurrentUser;
-
     private final String username;
     private final String password;
     private final String cellNumber;
